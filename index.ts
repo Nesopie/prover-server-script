@@ -5,11 +5,11 @@ import rsaInputs from "./inputs/rsa.json";
 import rsaPublicInputs from "./public_inputs/rsa.json";
 import ecdsaInputs from "./inputs/ecdsa.json";
 import ecdsaPublicInputs from "./public_inputs/ecdsa.json";
+const WebSocket = require("ws");
 
 function encryptAES256GCM(plaintext, key) {
   const iv = crypto.randomBytes(12); // GCM standard uses a 12-byte IV
 
-  console.log(key.length);
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
 
   let encrypted = cipher.update(plaintext, "utf8", "hex");
@@ -41,16 +41,17 @@ const helloBody = {
 };
 
 const circuitNames = [
-  "proveSha1Sha1Sha1Rsa655374096",
-  "proveSha256Sha256Sha256EcdsaBrainpoolP256r1",
+  "registerSha1Sha256Sha256Rsa655374096",
+  "registerSha256Sha256Sha256EcdsaBrainpoolP256r1",
 ];
 
 const inputs = [rsaInputs, ecdsaInputs];
 const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
 
 (async () => {
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 2; i++) {
     const helloRes = await axios.post("http://localhost:3001", helloBody);
+    console.log(helloRes.data);
     const serverPubkey = await helloRes.data.result.pubkey;
 
     const key2 = ec.keyFromPublic(serverPubkey, "hex");
@@ -83,5 +84,27 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
 
     const submitRes = await axios.post("http://localhost:3001", submitBody);
     console.log(submitRes.data);
+    const uuid = submitRes.data.result;
+
+    // const ws = new WebSocket("http://localhost:3002");
+
+    // ws.addEventListener("open", () => {
+    //   console.log("opened websocket server");
+    //   ws.send(uuid);
+    // });
+
+    // ws.addEventListener("error", (err) => {
+    //   console.error("WebSocket error:", err);
+    // });
+
+    // ws.addEventListener("message", (event) => {
+    //   console.log(event.data);
+    // });
+
+    // ws.addEventListener("close", (event) => {
+    //   console.log(
+    //     `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
+    //   );
+    // });
   }
 })();
