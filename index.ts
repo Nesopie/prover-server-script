@@ -50,7 +50,7 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
 
 (async () => {
   for (let i = 0; i < 2; i++) {
-    const helloRes = await axios.post("http://localhost:3001", helloBody);
+    const helloRes = await axios.post("http://13.201.172.127:8888", helloBody);
     console.log(helloRes.data);
     const serverPubkey = await helloRes.data.result.pubkey;
 
@@ -82,29 +82,32 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
       },
     };
 
-    const submitRes = await axios.post("http://localhost:3001", submitBody);
+    const submitRes = await axios.post(
+      "http://13.201.172.127:8888",
+      submitBody
+    );
     console.log(submitRes.data);
     const uuid = submitRes.data.result;
 
-    // const ws = new WebSocket("http://localhost:3002");
+    const ws = new WebSocket("http://13.201.172.127:8890");
 
-    // ws.addEventListener("open", () => {
-    //   console.log("opened websocket server");
-    //   ws.send(uuid);
-    // });
+    ws.addEventListener("open", () => {
+      console.log("opened websocket server");
+      ws.send(uuid);
+    });
 
-    // ws.addEventListener("error", (err) => {
-    //   console.error("WebSocket error:", err);
-    // });
+    ws.addEventListener("error", (err) => {
+      console.error("WebSocket error:", err);
+    });
 
-    // ws.addEventListener("message", (event) => {
-    //   console.log(event.data);
-    // });
+    ws.addEventListener("message", (event) => {
+      console.log(event.data);
+    });
 
-    // ws.addEventListener("close", (event) => {
-    //   console.log(
-    //     `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
-    //   );
-    // });
+    ws.addEventListener("close", (event) => {
+      console.log(
+        `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
+      );
+    });
   }
 })();

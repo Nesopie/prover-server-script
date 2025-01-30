@@ -8,12 +8,30 @@ importers:
 
   .:
     dependencies:
+      '@fidm/asn1':
+        specifier: ^1.0.4
+        version: 1.0.4
+      '@fidm/x509':
+        specifier: ^1.2.1
+        version: 1.2.1
+      '@ldclabs/cose-ts':
+        specifier: ^1.3.2
+        version: 1.3.2
       axios:
         specifier: ^1.7.9
         version: 1.7.9
+      cbor:
+        specifier: ^10.0.3
+        version: 10.0.3
+      cose-js:
+        specifier: ^0.9.0
+        version: 0.9.0
       elliptic:
         specifier: ^6.6.1
         version: 6.6.1
+      node-forge:
+        specifier: ^1.3.1
+        version: 1.3.1
       ws:
         specifier: ^8.18.0
         version: 8.18.0
@@ -21,11 +39,49 @@ importers:
       '@types/node':
         specifier: ^22.10.6
         version: 22.10.6
+      '@types/node-forge':
+        specifier: ^1.3.11
+        version: 1.3.11
 
 packages:
 
+  '@fidm/asn1@1.0.4':
+    resolution: {integrity: sha512-esd1jyNvRb2HVaQGq2Gg8Z0kbQPXzV9Tq5Z14KNIov6KfFD6PTaRIO8UpcsYiTNzOqJpmyzWgVTrUwFV3UF4TQ==}
+    engines: {node: '>= 8'}
+
+  '@fidm/x509@1.2.1':
+    resolution: {integrity: sha512-nwc2iesjyc9hkuzcrMCBXQRn653XuAUKorfWM8PZyJawiy1QzLj4vahwzaI25+pfpwOLvMzbJ0uKpWLDNmo16w==}
+    engines: {node: '>= 8'}
+
+  '@ldclabs/cose-ts@1.3.2':
+    resolution: {integrity: sha512-ArOnbKtccI93FkzaBq7DstJsOQLETZaxGb73UTFzot/tUGG5w85kTHgoLVsW7OpcA/AIHe/QQ12tB6stfpxSzw==}
+    engines: {node: '>=18.0.0'}
+
+  '@noble/ciphers@0.6.0':
+    resolution: {integrity: sha512-mIbq/R9QXk5/cTfESb1OKtyFnk7oc1Om/8onA1158K9/OZUQFDEVy55jVTato+xmp3XX6F6Qh0zz0Nc1AxAlRQ==}
+
+  '@noble/curves@1.8.1':
+    resolution: {integrity: sha512-warwspo+UYUPep0Q+vtdVB4Ugn8GGQj8iyB3gnRWsztmUHTI3S1nhdiWNsPUGL0vud7JlRRk1XEu7Lq1KGTnMQ==}
+    engines: {node: ^14.21.3 || >=16}
+
+  '@noble/hashes@1.7.1':
+    resolution: {integrity: sha512-B8XBPsn4vT/KJAGqDzbwztd+6Yte3P4V7iafm24bxgDe/mlRuK6xmWPuCNrKt2vDafZ8MfJLlchDG/vYafQEjQ==}
+    engines: {node: ^14.21.3 || >=16}
+
+  '@types/node-forge@1.3.11':
+    resolution: {integrity: sha512-FQx220y22OKNTqaByeBGqHWYz4cl94tpcxeFdvBo3wjG6XPBuZ0BNgNZRV5J5TFmmcsJ4IzsLkmGRiQbnYsBEQ==}
+
   '@types/node@22.10.6':
     resolution: {integrity: sha512-qNiuwC4ZDAUNcY47xgaSuS92cjf8JbSUoaKS77bmLG1rU7MlATVSiw/IlrjtIyyskXBZ8KkNfjK/P5na7rgXbQ==}
+
+  aes-cbc-mac@1.0.1:
+    resolution: {integrity: sha512-F1U0qNBNyrW82LRdQvYWKOpljZFnJ9LBUGWNCzCBTC3/+Fki77KgDrfJ+rBVlCpcmMT3jDEGhG61RMVeyHAKog==}
+
+  any-promise@1.3.0:
+    resolution: {integrity: sha512-7UvmKalWRt1wgjL1RrGxoSJW/0QZFIegpeGvZG9kjp8vrRu55XTHbwnqq2GpXm9uLbcuhxm3IqX9OB4MZR1b2A==}
+
+  asn1@0.2.6:
+    resolution: {integrity: sha512-ix/FxPn0MDjeyJ7i/yoHGFt/EX6LyNbxSEhPPXODPL+KB0VPk86UYfL0lMdy+KCnv+fmvIzySwaK5COwqVbWTQ==}
 
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
@@ -39,9 +95,25 @@ packages:
   brorand@1.1.0:
     resolution: {integrity: sha512-cKV8tMCEpQs4hK/ik71d6LrPOnpkpGBR0wzxqr68g2m/LB2GxVYQroAjMJZRVM1Y4BCjCKc3vAamxSzOY2RP+w==}
 
+  cbor@10.0.3:
+    resolution: {integrity: sha512-72Jnj81xMsqepqdcSdf2+fflz/UDsThOHy5hj2MW5F5xzHL8Oa0KQ6I6V9CwVUPxg5pf+W9xp6W2KilaRXWWtw==}
+    engines: {node: '>=18'}
+
+  cbor@8.1.0:
+    resolution: {integrity: sha512-DwGjNW9omn6EwP70aXsn7FQJx5kO12tX0bZkaTjzdVFM6/7nhA4t0EENocKGx6D2Bch9PE2KzCUf5SceBdeijg==}
+    engines: {node: '>=12.19'}
+
+  cborg@4.2.8:
+    resolution: {integrity: sha512-z9M+TZCWQbf89Gl8ulpYThM9fqmkjBDdMiq+wS72OAK2zqDaXNquoAWFDrAKHQAukVtPspmadB9chuFC0ut7ew==}
+    hasBin: true
+
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
+
+  cose-js@0.9.0:
+    resolution: {integrity: sha512-iYQvus+3LmjqXE2VkNKPQMZ5x+frSrk7WfSB7asTHYqpBuAG1ezdUEqJ5lXDuGoLbOSDOFAIgslawjkI2fX/hQ==}
+    engines: {node: '>=12.0'}
 
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
@@ -49,6 +121,10 @@ packages:
 
   elliptic@6.6.1:
     resolution: {integrity: sha512-RaddvvMatK2LJHqFJ+YA4WysVN5Ita9E35botqIYspQ4TkRAlCicdzKOjlyv/1Za5RyTNn7di//eEV0uTAfe3g==}
+
+  eyes@0.1.8:
+    resolution: {integrity: sha512-GipyPsXO1anza0AOZdy69Im7hGFCNB7Y/NGjDlZGJ3GJJLtwNSb2vrzYrTYJRrRloVx7pl+bhUaTB8yiccPvFQ==}
+    engines: {node: '> 0.1.90'}
 
   follow-redirects@1.15.9:
     resolution: {integrity: sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==}
@@ -86,11 +162,37 @@ packages:
   minimalistic-crypto-utils@1.0.1:
     resolution: {integrity: sha512-JIYlbt6g8i5jKfJ3xz7rF0LXmv2TkDxBLUkiBeZ7bAx4GnnNMr8xFpGnOxn6GhTEHx3SjRrZEoU+j04prX1ktg==}
 
+  node-forge@1.3.1:
+    resolution: {integrity: sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==}
+    engines: {node: '>= 6.13.0'}
+
+  node-hkdf-sync@1.0.0:
+    resolution: {integrity: sha512-dKe4X44YGLxPITIMdbnVw0URGTLw2lUUKmClar5iz53ZRrl3xGKk3k7KsBASRMHGh6bJCE1Gmuirb/QaL7rJuw==}
+    engines: {node: '>= 0.6.5'}
+
+  node-rsa@1.1.1:
+    resolution: {integrity: sha512-Jd4cvbJMryN21r5HgxQOpMEqv+ooke/korixNNK3mGqfGJmy0M77WDDzo/05969+OkMy3XW1UuZsSmW9KQm7Fw==}
+
+  nofilter@3.1.0:
+    resolution: {integrity: sha512-l2NNj07e9afPnhAhvgVrCD/oy2Ai1yfLpuo3EpiO1jFTsB4sFz6oIfAfSZyQzVpkZQ9xS8ZS5g1jCBgq4Hwo0g==}
+    engines: {node: '>=12.19'}
+
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
+  safer-buffer@2.1.2:
+    resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
+
+  tweetnacl@1.0.3:
+    resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
+
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
+
+  vows@0.5.13:
+    resolution: {integrity: sha512-m2+3s/ITbI95b7uzsBnA7oZg7/bJZFb+sKp2TUvomrIQxjtuNOivf/yOxAAyhEAX8gkIogoXfBJRmj9ys8r3gQ==}
+    engines: {node: '>=0.2.6'}
+    hasBin: true
 
   ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
@@ -106,9 +208,43 @@ packages:
 
 snapshots:
 
+  '@fidm/asn1@1.0.4': {}
+
+  '@fidm/x509@1.2.1':
+    dependencies:
+      '@fidm/asn1': 1.0.4
+      tweetnacl: 1.0.3
+
+  '@ldclabs/cose-ts@1.3.2':
+    dependencies:
+      '@noble/ciphers': 0.6.0
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      cborg: 4.2.8
+
+  '@noble/ciphers@0.6.0': {}
+
+  '@noble/curves@1.8.1':
+    dependencies:
+      '@noble/hashes': 1.7.1
+
+  '@noble/hashes@1.7.1': {}
+
+  '@types/node-forge@1.3.11':
+    dependencies:
+      '@types/node': 22.10.6
+
   '@types/node@22.10.6':
     dependencies:
       undici-types: 6.20.0
+
+  aes-cbc-mac@1.0.1: {}
+
+  any-promise@1.3.0: {}
+
+  asn1@0.2.6:
+    dependencies:
+      safer-buffer: 2.1.2
 
   asynckit@0.4.0: {}
 
@@ -124,9 +260,28 @@ snapshots:
 
   brorand@1.1.0: {}
 
+  cbor@10.0.3:
+    dependencies:
+      nofilter: 3.1.0
+
+  cbor@8.1.0:
+    dependencies:
+      nofilter: 3.1.0
+
+  cborg@4.2.8: {}
+
   combined-stream@1.0.8:
     dependencies:
       delayed-stream: 1.0.0
+
+  cose-js@0.9.0:
+    dependencies:
+      aes-cbc-mac: 1.0.1
+      any-promise: 1.3.0
+      cbor: 8.1.0
+      elliptic: 6.6.1
+      node-hkdf-sync: 1.0.0
+      node-rsa: 1.1.1
 
   delayed-stream@1.0.0: {}
 
@@ -139,6 +294,8 @@ snapshots:
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
+
+  eyes@0.1.8: {}
 
   follow-redirects@1.15.9: {}
 
@@ -171,8 +328,28 @@ snapshots:
 
   minimalistic-crypto-utils@1.0.1: {}
 
+  node-forge@1.3.1: {}
+
+  node-hkdf-sync@1.0.0:
+    dependencies:
+      vows: 0.5.13
+
+  node-rsa@1.1.1:
+    dependencies:
+      asn1: 0.2.6
+
+  nofilter@3.1.0: {}
+
   proxy-from-env@1.1.0: {}
 
+  safer-buffer@2.1.2: {}
+
+  tweetnacl@1.0.3: {}
+
   undici-types@6.20.0: {}
+
+  vows@0.5.13:
+    dependencies:
+      eyes: 0.1.8
 
   ws@8.18.0: {}
