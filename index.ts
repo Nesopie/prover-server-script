@@ -1,11 +1,15 @@
-import { ec as EC } from "elliptic";
+import elliptic from "elliptic";
 import axios from "axios";
 import * as crypto from "crypto";
 import rsaInputs from "./inputs/rsa.json";
 import rsaPublicInputs from "./public_inputs/rsa.json";
 import ecdsaInputs from "./inputs/ecdsa.json";
 import ecdsaPublicInputs from "./public_inputs/ecdsa.json";
-const WebSocket = require("ws");
+import WebSocket from "ws";
+
+const { ec: EC } = elliptic;
+const rpcUrl = "http://127.0.0.1:3001";
+const wsUrl = "http://127.0.0.1:3002";
 
 function encryptAES256GCM(plaintext, key) {
   const iv = crypto.randomBytes(12); // GCM standard uses a 12-byte IV
@@ -50,7 +54,7 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
 
 (async () => {
   for (let i = 0; i < 2; i++) {
-    const helloRes = await axios.post("http://13.201.172.127:8888", helloBody);
+    const helloRes = await axios.post(rpcUrl, helloBody);
     console.log(helloRes.data);
     const serverPubkey = await helloRes.data.result.pubkey;
 
@@ -82,14 +86,11 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
       },
     };
 
-    const submitRes = await axios.post(
-      "http://13.201.172.127:8888",
-      submitBody
-    );
+    const submitRes = await axios.post(rpcUrl, submitBody);
     console.log(submitRes.data);
     const uuid = submitRes.data.result;
 
-    const ws = new WebSocket("http://13.201.172.127:8890");
+    const ws = new WebSocket(wsUrl);
 
     ws.addEventListener("open", () => {
       console.log("opened websocket server");
