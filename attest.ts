@@ -468,7 +468,9 @@ const toDER = function toDER(rBuf: Buffer, sBuf: Buffer): Buffer {
     throw new Error("Invalid certificate chain");
   }
 
-  const finalCert = Certificate.fromPEM(Buffer.from(aws_root_cert_pem));
+  const finalCert = Certificate.fromPEM(
+    Buffer.from(certChain[certChain.length - 1])
+  );
   const key = ECDSAKey.fromPublic(
     finalCert.publicKey.keyRaw,
     utf8ToBytes("AsymmetricECDSA384")
