@@ -8,8 +8,10 @@ import ecdsaPublicInputs from "./public_inputs/ecdsa.json";
 import WebSocket from "ws";
 
 const { ec: EC } = elliptic;
-const rpcUrl = "http://127.0.0.1:3001";
-const wsUrl = "http://127.0.0.1:3002";
+const rpcUrl =
+  "ws://ad3c378249c1242619c12616bbbc4036-28818039163c2199.elb.eu-west-1.amazonaws.com:8888/";
+const wsUrl =
+  "ws://ad3c378249c1242619c12616bbbc4036-28818039163c2199.elb.eu-west-1.amazonaws.com:8890/";
 
 function encryptAES256GCM(plaintext, key) {
   const iv = crypto.randomBytes(12); // GCM standard uses a 12-byte IV
@@ -53,62 +55,70 @@ const inputs = [rsaInputs, ecdsaInputs];
 const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
 
 (async () => {
-  for (let i = 0; i < 2; i++) {
-    const helloRes = await axios.post(rpcUrl, helloBody);
-    console.log(helloRes.data);
-    const serverPubkey = await helloRes.data.result.pubkey;
+  for (let i = 0; i < 1; i++) {
+    const ws = new WebSocket(rpcUrl);
 
-    const key2 = ec.keyFromPublic(serverPubkey, "hex");
-
-    const index = i % 2;
-
-    const sharedKey = key1.derive(key2.getPublic());
-
-    const encryptionData = encryptAES256GCM(
-      JSON.stringify({
-        type: "register",
-        prove: {
-          name: circuitNames[index],
-          inputs: JSON.stringify(inputs[index]),
-          public_inputs: JSON.stringify(publicInputs[index]),
-        },
-      }),
-      Buffer.from(sharedKey.toString("hex").padStart(64, "0"), "hex")
-    );
-
-    const submitBody = {
-      jsonrpc: "2.0",
-      method: "openpassport_submit_request",
-      id: 1,
-      params: {
-        uuid: helloRes.data.result.uuid,
-        ...encryptionData,
-      },
-    };
-
-    const submitRes = await axios.post(rpcUrl, submitBody);
-    console.log(submitRes.data);
-    const uuid = submitRes.data.result;
-
-    const ws = new WebSocket(wsUrl);
-
-    ws.addEventListener("open", () => {
-      console.log("opened websocket server");
-      ws.send(uuid);
+    ws.on("open", async () => {
+      ws.send(JSON.stringify(helloBody));
     });
 
-    ws.addEventListener("error", (err) => {
-      console.error("WebSocket error:", err);
-    });
+    ws.on("message", async (data) => {
+      let textDecoder = new TextDecoder();
+      let result = JSON.parse(textDecoder.decode(Buffer.from(data)));
+      console.log(result);
+      if (result.result.pubkey !== undefined) {
+        const serverPubkey = await result.result.pubkey;
+        const key2 = ec.keyFromPublic(serverPubkey, "hex");
+        const index = i % 2;
+        const sharedKey = key1.derive(key2.getPublic());
+        const encryptionData = encryptAES256GCM(
+          JSON.stringify({
+            type: "register",
+            prove: {
+              name: circuitNames[index],
+              inputs: JSON.stringify(inputs[index]),
+              public_inputs: JSON.stringify(publicInputs[index]),
+            },
+          }),
+          Buffer.from(sharedKey.toString("hex").padStart(64, "0"), "hex")
+        );
+        const submitBody = {
+          jsonrpc: "2.0",
+          method: "openpassport_submit_request",
+          id: 1,
+          params: {
+            uuid: result.result.uuid,
+            ...encryptionData,
+          },
+        };
+        ws.send(JSON.stringify(submitBody));
 
-    ws.addEventListener("message", (event) => {
-      console.log(event.data);
-    });
-
-    ws.addEventListener("close", (event) => {
-      console.log(
-        `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
-      );
+        // const submitRes = await axios.post(rpcUrl, submitBody);
+      } else {
+        const uuid = result.result;
+        const ws2 = new WebSocket(wsUrl);
+        ws2.addEventListener("open", () => {
+          console.log("opened websocket server");
+          ws2.send(uuid);
+        });
+        ws2.addEventListener("error", (err) => {
+          console.error("WebSocket error:", err);
+        });
+        ws2.addEventListener("message", (event) => {
+          // console.log(JSON.parse(event.data.toString()));
+          const message = JSON.parse(event.data.toString());
+          console.log(message);
+          if (message.proof !== null) {
+            ws2.close();
+            ws.close();
+          }
+        });
+        ws2.addEventListener("close", (event) => {
+          console.log(
+            `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
+          );
+        });
+      }
     });
   }
 })();
