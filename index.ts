@@ -6,12 +6,12 @@ import rsaPublicInputs from "./public_inputs/rsa.json";
 import ecdsaInputs from "./inputs/ecdsa.json";
 import ecdsaPublicInputs from "./public_inputs/ecdsa.json";
 import WebSocket from "ws";
+import { verifyAttestion } from "./attest";
 
 const { ec: EC } = elliptic;
-const rpcUrl =
-  "ws://ad3c378249c1242619c12616bbbc4036-28818039163c2199.elb.eu-west-1.amazonaws.com:8888/";
-const wsUrl =
-  "ws://ad3c378249c1242619c12616bbbc4036-28818039163c2199.elb.eu-west-1.amazonaws.com:8890/";
+const rpcUrl = "ws://65.2.56.192:8888/";
+const wsUrl = "ws://65.2.56.192:8890/";
+// ("ws://ad3c378249c1242619c12616bbbc4036-28818039163c2199.elb.eu-west-1.amazonaws.com:8890/");
 
 function encryptAES256GCM(plaintext, key) {
   const iv = crypto.randomBytes(12); // GCM standard uses a 12-byte IV
@@ -55,7 +55,7 @@ const inputs = [rsaInputs, ecdsaInputs];
 const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
 
 (async () => {
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 2; i++) {
     const ws = new WebSocket(rpcUrl);
 
     ws.on("open", async () => {
@@ -66,8 +66,12 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
       let textDecoder = new TextDecoder();
       let result = JSON.parse(textDecoder.decode(Buffer.from(data)));
       console.log(result);
-      if (result.result.pubkey !== undefined) {
-        const serverPubkey = await result.result.pubkey;
+      if (result.result.attestation !== undefined) {
+        const { userData, pubkey } = await verifyAttestion(
+          result.result.attestation
+        );
+        //check if key1 is the same as userData
+        const serverPubkey = pubkey!;
         const key2 = ec.keyFromPublic(serverPubkey, "hex");
         const index = i % 2;
         const sharedKey = key1.derive(key2.getPublic());
@@ -92,8 +96,6 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
           },
         };
         ws.send(JSON.stringify(submitBody));
-
-        // const submitRes = await axios.post(rpcUrl, submitBody);
       } else {
         const uuid = result.result;
         const ws2 = new WebSocket(wsUrl);
