@@ -7,11 +7,11 @@ import ecdsaInputs from "./inputs/ecdsa.json";
 import ecdsaPublicInputs from "./public_inputs/ecdsa.json";
 import WebSocket from "ws";
 import { verifyAttestion } from "./attest";
+import { v4 } from "uuid";
 
 const { ec: EC } = elliptic;
-const rpcUrl = "ws://65.2.56.192:8888/";
-const wsUrl = "ws://65.2.56.192:8890/";
-// ("ws://ad3c378249c1242619c12616bbbc4036-28818039163c2199.elb.eu-west-1.amazonaws.com:8890/");
+const rpcUrl = "ws://3.110.229.45:8888/";
+const wsUrl = "ws://localhost:3002/";
 
 function encryptAES256GCM(plaintext, key) {
   const iv = crypto.randomBytes(12); // GCM standard uses a 12-byte IV
@@ -34,32 +34,36 @@ const ec = new EC("p256");
 
 const key1 = ec.genKeyPair();
 
-const pubkey =
-  key1.getPublic().getX().toString("hex").padStart(64, "0") +
-  key1.getPublic().getY().toString("hex").padStart(64, "0");
-const helloBody = {
-  jsonrpc: "2.0",
-  method: "openpassport_hello",
-  id: 1,
-  params: {
-    user_pubkey: [4, ...Array.from(Buffer.from(pubkey, "hex"))],
-  },
-};
-
 const circuitNames = [
-  "registerSha1Sha256Sha256Rsa655374096",
-  "registerSha256Sha256Sha256EcdsaBrainpoolP256r1",
+  "register_sha1_sha256_sha256_rsa_65537_4096",
+  "register_sha256_sha256_sha256_ecdsa_brainpoolP256r1",
 ];
 
 const inputs = [rsaInputs, ecdsaInputs];
 const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
 
 (async () => {
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 1; i++) {
+    const pubkey =
+      key1.getPublic().getX().toString("hex").padStart(64, "0") +
+      key1.getPublic().getY().toString("hex").padStart(64, "0");
+    const helloBody = {
+      jsonrpc: "2.0",
+      method: "openpassport_hello",
+      id: 1,
+      params: {
+        user_pubkey: [4, ...Array.from(Buffer.from(pubkey, "hex"))],
+        uuid: v4(),
+      },
+    };
     const ws = new WebSocket(rpcUrl);
 
     ws.on("open", async () => {
       ws.send(JSON.stringify(helloBody));
+    });
+
+    ws.on("close", () => {
+      console.log("WebSocket closed");
     });
 
     ws.on("message", async (data) => {
@@ -78,7 +82,7 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
         const encryptionData = encryptAES256GCM(
           JSON.stringify({
             type: "register",
-            prove: {
+            circuit: {
               name: circuitNames[index],
               inputs: JSON.stringify(inputs[index]),
               public_inputs: JSON.stringify(publicInputs[index]),
@@ -97,20 +101,28 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
         };
         ws.send(JSON.stringify(submitBody));
       } else {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         const uuid = result.result;
         const ws2 = new WebSocket(wsUrl);
+
+        let interval;
+
         ws2.addEventListener("open", () => {
           console.log("opened websocket server");
-          ws2.send(uuid);
+          ws2.send(`subscribe_${uuid}`);
+          // interval = setInterval(() => {
+          //   ws2.send(`request_${uuid}`);
+          // }, 2000);
         });
         ws2.addEventListener("error", (err) => {
           console.error("WebSocket error:", err);
         });
         ws2.addEventListener("message", (event) => {
-          // console.log(JSON.parse(event.data.toString()));
           const message = JSON.parse(event.data.toString());
           console.log(message);
           if (message.proof !== null) {
+            clearInterval(interval);
+            console.log("hi");
             ws2.close();
             ws.close();
           }
