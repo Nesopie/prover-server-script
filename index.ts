@@ -11,6 +11,7 @@ import { v4 } from "uuid";
 
 const { ec: EC } = elliptic;
 const rpcUrl = "ws://3.110.229.45:8888/";
+// const wsUrl = "ws://43.205.137.10:8888/";
 const wsUrl = "ws://localhost:3002/";
 
 function encryptAES256GCM(plaintext, key) {
@@ -43,7 +44,7 @@ const inputs = [rsaInputs, ecdsaInputs];
 const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
 
 (async () => {
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 2; i++) {
     const pubkey =
       key1.getPublic().getX().toString("hex").padStart(64, "0") +
       key1.getPublic().getY().toString("hex").padStart(64, "0");
@@ -97,6 +98,7 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
           params: {
             uuid: result.result.uuid,
             ...encryptionData,
+            onchain: true,
           },
         };
         ws.send(JSON.stringify(submitBody));
