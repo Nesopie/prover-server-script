@@ -10,8 +10,7 @@ import { verifyAttestion } from "./attest";
 import { v4 } from "uuid";
 
 const { ec: EC } = elliptic;
-const rpcUrl = "ws://3.110.229.45:8888/";
-// const wsUrl = "ws://43.205.137.10:8888/";
+const rpcUrl = "";
 const wsUrl = "ws://localhost:3002/";
 
 function encryptAES256GCM(plaintext, key) {
@@ -44,7 +43,7 @@ const inputs = [rsaInputs, ecdsaInputs];
 const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
 
 (async () => {
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 1; i++) {
     const pubkey =
       key1.getPublic().getX().toString("hex").padStart(64, "0") +
       key1.getPublic().getY().toString("hex").padStart(64, "0");
@@ -103,37 +102,35 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
         };
         ws.send(JSON.stringify(submitBody));
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        const uuid = result.result;
-        const ws2 = new WebSocket(wsUrl);
-
-        let interval;
-
-        ws2.addEventListener("open", () => {
-          console.log("opened websocket server");
-          ws2.send(`subscribe_${uuid}`);
-          // interval = setInterval(() => {
-          //   ws2.send(`request_${uuid}`);
-          // }, 2000);
-        });
-        ws2.addEventListener("error", (err) => {
-          console.error("WebSocket error:", err);
-        });
-        ws2.addEventListener("message", (event) => {
-          const message = JSON.parse(event.data.toString());
-          console.log(message);
-          if (message.proof !== null) {
-            clearInterval(interval);
-            console.log("hi");
-            ws2.close();
-            ws.close();
-          }
-        });
-        ws2.addEventListener("close", (event) => {
-          console.log(
-            `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
-          );
-        });
+        // await new Promise((resolve) => setTimeout(resolve, 1000));
+        // const uuid = result.result;
+        // const ws2 = new WebSocket(wsUrl);
+        // let interval;
+        // ws2.addEventListener("open", () => {
+        //   console.log("opened websocket server");
+        //   ws2.send(`subscribe_${uuid}`);
+        //   // interval = setInterval(() => {
+        //   //   ws2.send(`request_${uuid}`);
+        //   // }, 2000);
+        // });
+        // ws2.addEventListener("error", (err) => {
+        //   console.error("WebSocket error:", err);
+        // });
+        // ws2.addEventListener("message", (event) => {
+        //   const message = JSON.parse(event.data.toString());
+        //   console.log(message);
+        //   if (message.proof !== null) {
+        //     clearInterval(interval);
+        //     console.log("hi");
+        //     ws2.close();
+        //     ws.close();
+        //   }
+        // });
+        // ws2.addEventListener("close", (event) => {
+        //   console.log(
+        //     `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
+        //   );
+        // });
       }
     });
   }
