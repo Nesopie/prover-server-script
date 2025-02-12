@@ -2,16 +2,14 @@ import elliptic from "elliptic";
 import axios from "axios";
 import * as crypto from "crypto";
 import rsaInputs from "./inputs/rsa.json";
-import rsaPublicInputs from "./public_inputs/rsa.json";
 import ecdsaInputs from "./inputs/ecdsa.json";
-import ecdsaPublicInputs from "./public_inputs/ecdsa.json";
+import dscRsaInputs from "./inputs/dsc_rsa.json";
+import discloseInputs from "./inputs/disclose.json";
 import WebSocket from "ws";
 import { verifyAttestion } from "./attest";
 import { v4 } from "uuid";
 
 const { ec: EC } = elliptic;
-const rpcUrl = "";
-const wsUrl = "ws://localhost:3002/";
 
 function encryptAES256GCM(plaintext, key) {
   const iv = crypto.randomBytes(12); // GCM standard uses a 12-byte IV
@@ -37,13 +35,22 @@ const key1 = ec.genKeyPair();
 const circuitNames = [
   "register_sha1_sha256_sha256_rsa_65537_4096",
   "register_sha256_sha256_sha256_ecdsa_brainpoolP256r1",
+  "dsc_sha256_rsa_65537_4096",
+  "vc_and_disclose",
 ];
 
-const inputs = [rsaInputs, ecdsaInputs];
-const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
+const inputs = [rsaInputs, ecdsaInputs, dscRsaInputs, discloseInputs];
 
+const rpcUrls = [
+  "register_rpc_url",
+  "register_rpc_url",
+  "dsc_rpc_url",
+  "disclose_rpc_url",
+];
+
+const circuitTypes = ["register", "register", "dsc", "disclose"];
 (async () => {
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 4; i++) {
     const pubkey =
       key1.getPublic().getX().toString("hex").padStart(64, "0") +
       key1.getPublic().getY().toString("hex").padStart(64, "0");
@@ -56,7 +63,7 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
         uuid: v4(),
       },
     };
-    const ws = new WebSocket(rpcUrl);
+    const ws = new WebSocket(rpcUrls[i]);
 
     ws.on("open", async () => {
       ws.send(JSON.stringify(helloBody));
@@ -81,11 +88,10 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
         const sharedKey = key1.derive(key2.getPublic());
         const encryptionData = encryptAES256GCM(
           JSON.stringify({
-            type: "register",
+            type: circuitTypes[i],
             circuit: {
               name: circuitNames[index],
               inputs: JSON.stringify(inputs[index]),
-              public_inputs: JSON.stringify(publicInputs[index]),
             },
           }),
           Buffer.from(sharedKey.toString("hex").padStart(64, "0"), "hex")
@@ -102,35 +108,35 @@ const publicInputs = [rsaPublicInputs, ecdsaPublicInputs];
         };
         ws.send(JSON.stringify(submitBody));
       } else {
-        // await new Promise((resolve) => setTimeout(resolve, 1000));
-        // const uuid = result.result;
-        // const ws2 = new WebSocket(wsUrl);
-        // let interval;
-        // ws2.addEventListener("open", () => {
-        //   console.log("opened websocket server");
-        //   ws2.send(`subscribe_${uuid}`);
-        //   // interval = setInterval(() => {
-        //   //   ws2.send(`request_${uuid}`);
-        //   // }, 2000);
-        // });
-        // ws2.addEventListener("error", (err) => {
-        //   console.error("WebSocket error:", err);
-        // });
-        // ws2.addEventListener("message", (event) => {
-        //   const message = JSON.parse(event.data.toString());
-        //   console.log(message);
-        //   if (message.proof !== null) {
-        //     clearInterval(interval);
-        //     console.log("hi");
-        //     ws2.close();
-        //     ws.close();
-        //   }
-        // });
-        // ws2.addEventListener("close", (event) => {
-        //   console.log(
-        //     `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
-        //   );
-        // });
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const uuid = result.result;
+        const ws2 = new WebSocket(wsUrl);
+        let interval;
+        ws2.addEventListener("open", () => {
+          console.log("opened websocket server");
+          ws2.send(`subscribe_${uuid}`);
+          // interval = setInterval(() => {
+          //   ws2.send(`request_${uuid}`);
+          // }, 2000);
+        });
+        ws2.addEventListener("error", (err) => {
+          console.error("WebSocket error:", err);
+        });
+        ws2.addEventListener("message", (event) => {
+          const message = JSON.parse(event.data.toString());
+          console.log(message);
+          if (message.proof !== null) {
+            clearInterval(interval);
+            console.log("hi");
+            ws2.close();
+            ws.close();
+          }
+        });
+        ws2.addEventListener("close", (event) => {
+          console.log(
+            `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
+          );
+        });
       }
     });
   }
