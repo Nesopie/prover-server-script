@@ -11,6 +11,7 @@ import { v4 } from "uuid";
 
 const { ec: EC } = elliptic;
 
+const wsUrl = "ws://127.0.0.1:3002";
 function encryptAES256GCM(plaintext, key) {
   const iv = crypto.randomBytes(12); // GCM standard uses a 12-byte IV
 
@@ -42,15 +43,15 @@ const circuitNames = [
 const inputs = [rsaInputs, ecdsaInputs, dscRsaInputs, discloseInputs];
 
 const rpcUrls = [
-  "register_rpc_url",
-  "register_rpc_url",
-  "dsc_rpc_url",
-  "disclose_rpc_url",
+  "ws://<register_url>",
+  "ws://<register_url>",
+  "ws://<dsc_url>",
+  "ws://<disclose_url>",
 ];
 
 const circuitTypes = ["register", "register", "dsc", "disclose"];
 (async () => {
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < rpcUrls.length; i++) {
     const pubkey =
       key1.getPublic().getX().toString("hex").padStart(64, "0") +
       key1.getPublic().getY().toString("hex").padStart(64, "0");
@@ -84,14 +85,13 @@ const circuitTypes = ["register", "register", "dsc", "disclose"];
         //check if key1 is the same as userData
         const serverPubkey = pubkey!;
         const key2 = ec.keyFromPublic(serverPubkey, "hex");
-        const index = i % 2;
         const sharedKey = key1.derive(key2.getPublic());
         const encryptionData = encryptAES256GCM(
           JSON.stringify({
             type: circuitTypes[i],
             circuit: {
-              name: circuitNames[index],
-              inputs: JSON.stringify(inputs[index]),
+              name: circuitNames[i],
+              inputs: JSON.stringify(inputs[i]),
             },
           }),
           Buffer.from(sharedKey.toString("hex").padStart(64, "0"), "hex")
