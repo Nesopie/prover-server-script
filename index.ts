@@ -8,10 +8,11 @@ import discloseInputs from "./inputs/disclose.json";
 import WebSocket from "ws";
 import { verifyAttestion } from "./attest";
 import { v4 } from "uuid";
+import { io } from "socket.io-client";
 
 const { ec: EC } = elliptic;
 
-const wsUrl = "ws://127.0.0.1:3002";
+const wsUrl = "";
 function encryptAES256GCM(plaintext, key) {
   const iv = crypto.randomBytes(12); // GCM standard uses a 12-byte IV
 
@@ -42,16 +43,11 @@ const circuitNames = [
 
 const inputs = [rsaInputs, ecdsaInputs, dscRsaInputs, discloseInputs];
 
-const rpcUrls = [
-  "ws://<register_url>",
-  "ws://<register_url>",
-  "ws://<dsc_url>",
-  "ws://<disclose_url>",
-];
+const rpcUrls = [];
 
 const circuitTypes = ["register", "register", "dsc", "disclose"];
 (async () => {
-  for (let i = 0; i < rpcUrls.length; i++) {
+  for (let i = 0; i < 1; i++) {
     const pubkey =
       key1.getPublic().getX().toString("hex").padStart(64, "0") +
       key1.getPublic().getY().toString("hex").padStart(64, "0");
@@ -86,9 +82,17 @@ const circuitTypes = ["register", "register", "dsc", "disclose"];
         const serverPubkey = pubkey!;
         const key2 = ec.keyFromPublic(serverPubkey, "hex");
         const sharedKey = key1.derive(key2.getPublic());
+
+        const endpoint =
+          circuitTypes[i] === "disclose"
+            ? { endpointType: "celo", endpoint: "http://random_url.com" }
+            : {};
+
         const encryptionData = encryptAES256GCM(
           JSON.stringify({
             type: circuitTypes[i],
+            onchain: true,
+            ...endpoint,
             circuit: {
               name: circuitNames[i],
               inputs: JSON.stringify(inputs[i]),
@@ -103,39 +107,34 @@ const circuitTypes = ["register", "register", "dsc", "disclose"];
           params: {
             uuid: result.result.uuid,
             ...encryptionData,
-            onchain: true,
           },
         };
         ws.send(JSON.stringify(submitBody));
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         const uuid = result.result;
-        const ws2 = new WebSocket(wsUrl);
-        let interval;
-        ws2.addEventListener("open", () => {
-          console.log("opened websocket server");
-          ws2.send(`subscribe_${uuid}`);
-          // interval = setInterval(() => {
-          //   ws2.send(`request_${uuid}`);
-          // }, 2000);
+        const socket2 = io(wsUrl, { transports: ["websocket"] });
+        socket2.on("connect", () => {
+          console.log("Connected to Socket.IO server");
+          socket2.emit("subscribe", uuid);
         });
-        ws2.addEventListener("error", (err) => {
-          console.error("WebSocket error:", err);
+        socket2.on("error", (err) => {
+          console.error("Socket.IO error:", err);
         });
-        ws2.addEventListener("message", (event) => {
-          const message = JSON.parse(event.data.toString());
-          console.log(message);
-          if (message.proof !== null) {
-            clearInterval(interval);
-            console.log("hi");
-            ws2.close();
-            ws.close();
+        socket2.on("status", (data) => {
+          try {
+            console.log(data);
+            if (data.proof !== null) {
+              console.log("Proof received. Closing connections.");
+              socket2.disconnect();
+              ws.close();
+            }
+          } catch (e) {
+            console.error("Error parsing message:", e);
           }
         });
-        ws2.addEventListener("close", (event) => {
-          console.log(
-            `WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
-          );
+        socket2.on("disconnect", (reason) => {
+          console.log(`Socket.IO disconnected: ${reason}`);
         });
       }
     });
